@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 input_files = glob.glob('../test_images/*.jpg')
 output_dir = '../output_images/'
-viz = True
+viz = False
 
 
 def annotate_road_image(image):
@@ -35,6 +35,11 @@ def annotate_road_image(image):
 mtx, dist = camera_calibration_load('../camera_cal/calibration.p')
 imgs = [cv2.cvtColor(cv2.imread(f), cv2.COLOR_BGR2RGB) for f in input_files]
 undistorted = [load_and_undistort_img(f, mtx, dist) for f in input_files]
+
+# Undistort an image form the road
+if viz:
+    road = load_and_undistort_img('../test_images/test4.jpg', mtx, dist)
+    plt.imsave('../output_images/road_undistorted.jpg', road)
 
 # first do some arithmetic on the vanishing point to get the trapezoid points
 vp_y = 418  # vp from top of image

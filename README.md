@@ -42,7 +42,7 @@ To demonstrate this an image from the `test_images/` directory is loaded and dis
 The calibration details loads the Calibration Matrix and Distortion Coefficient for this camera from  `camera_ca/calibration.p` and undistorts the image by applying the `cv2.undistort()` function.
 Here we see that the results are not as clearly appreciated as on a chess board image. Look closely at the white car on the right and the dashboard of the driving car, one can see distortion correction.
  
-![distortion correction on road](output_images/road_undistorted)
+![distortion correction on road](output_images/road_undistorted.jpg)
 
 ### Perspective Transform
 
@@ -59,7 +59,7 @@ We use one which covers almost all of the cameras wide angle view as seen below:
 ![stacked](output_images/trapezoid.jpg)
 
 Taking a wide view has an added advantage we can use this transform to restrict the region of interest in one pass.
-The arithmetic in `code/detect.lanes.py` looks like
+The arithmetic in `code/detect_lanes.py` looks like
 
 ```
 # arithmetic on the vanishing point to get the trapezoid points
