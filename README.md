@@ -5,7 +5,7 @@
 Overview - Udacity Self Driving Car Term 1 Project 3
 ----------------------------------------------------
 
-![annotated][./ouput_images/annotated0.jpg]
+![annotated](./ouput_images/annotated0.jpg)
 
 
 The goals / steps of this project are the following:
@@ -32,7 +32,7 @@ On running it on an we get:
 
 The code can be found in `code/camera_calibration.py`
 
-![camera calibration][output_images/calibrated.jpg]
+![camera calibration](output_images/calibrated.jpg)
 
 The calibration needs to be done only once. The results are save in `camera_ca/calibration.p` for further use.
 
@@ -42,7 +42,7 @@ To demonstrate this an image from the `test_images\` directory is loaded and dis
 The calibration details loads the Calibration Matrix and Distortion Coefficient for this camera from  `camera_ca/calibration.p` and undistorts the image by applying the `cv2.undistort()` function.
 Here we see that the results are not as clearly appreciated as on a chess board image. Look closely at the white car on the right and the dashboard of the driving car, one can see distortion correction.
  
-![distortion correction on road][output_images/road_undistorted]
+![distortion correction on road](output_images/road_undistorted)
 
 ### Perspective Transform
 
@@ -56,8 +56,8 @@ Based on this we can use any isosceles trapezoid with its base centered at the b
 
 We use one which covers almost all of the cameras wide angle view as seen below:
 
-![stacked][output_images/trapezoid.jpg]
-![bird view with marker][output_images/birds_view_with_trapezoid.jpg]
+![stacked](output_images/trapezoid.jpg)
+![bird view with marker](output_images/birds_view_with_trapezoid.jpg)
 
 Taking a wide view has an added advantage we can use this transform to restrict the region of interest in one pass.
 The arithmetic in `code/detect.lanes.py` looks like
@@ -81,12 +81,12 @@ bird_view_size = (800, 800)  # Setup a 800x800 image to look at the birds view
 offsets = [40, 0, 40, 0]  # offset to where the trapezoid vertices should be transformed to. positive values go into the image
 ```
 
-![bird view][output_images/birds_view_with_trapezoid.jpg]
+![bird view](output_images/birds_view_with_trapezoid.jpg)
 
 We see that the transformation into birds views results in parallel road lines.
 Transforming our set of trouble images into birds eye view would result in
  
-![bird view][output_images/birds_view.jpg]
+![bird view](output_images/birds_view.jpg)
 
 We can see that the lanes are parallel and pretty clear at the bottom of the views (near the camera of car), looks good so far.
 
@@ -101,7 +101,7 @@ These are stacked on each other so that we get a combined signal from each sourc
 
 Images from each source are thresholded by values determined emperically thus the final signal from every pixel is wither a 0 or a 1 (in our case 255) 
 
-![stacked][./output_images/birds_view_masked.jpg]
+![stacked](./output_images/birds_view_masked.jpg)
 
 
 ### Polynomial Fit
@@ -118,7 +118,7 @@ leftx_base = np.argmax(histogram[:midpoint])
 rightx_base = np.argmax(histogram[midpoint:]) + midpoint
 ```
  
-![histogram][./output_images/histogram.jpg]
+![histogram](./output_images/histogram.jpg)
 
 We use a sliding window approach where the image is split in to half vertically then a small window slide across each half looking for strong input singals
 
@@ -126,8 +126,8 @@ Each window starts above the lower one and then searches for the area where the 
 
 These centroids are then fitted by a second degree curve.
 
-![sliding window1][./output_imageslanes_marked_3.jpg]
-![sliding window2][./output_imageslanes_marked_6.jpg]
+![sliding window1](./output_imageslanes_marked_3.jpg)
+![sliding window2](./output_imageslanes_marked_6.jpg)
 
 ### Vehicle Position in Lane
 
@@ -151,12 +151,12 @@ A guide on radius of curvature http://www.intmath.com/applications-differentiati
 
 Fist we convert the left_fit and right_fit from warped space to undistorted space. 
 The radius of curvature for a quadratic function is computed with the formula
-( (1 + f'(y)^2)^3/2 ) / abs(2f''(y)
+( (1 + f'(y)^2)^3/2 ) / abs(2f''(y))
 
 See the function `curvature_lr()` in `lane_marking_utils.py`   
 
 
-![annotated][./ouput_images/annotated7.jpg]
+![annotated](./ouput_images/annotated7.jpg)
 
 ### Result (video)
 
