@@ -74,6 +74,7 @@ def fit_poly(binary_warped, visualize=False, filename=''):
 
     # Generate x and y values for plotting
     if visualize:
+        plt.clf()
         ploty = np.linspace(0, binary_warped.shape[0]-1, binary_warped.shape[0])
         left_fitx = lane_poly(ploty, left_fit)
         right_fitx = lane_poly(ploty, right_fit)

@@ -127,9 +127,10 @@ if viz:
 if viz:
     imgs_to_examine = [3,5,6,7]
     for i, index in enumerate(imgs_to_examine):
+        warped = bird_view(undistorted[index], M)
+        warped_binary = color_pipeline_ng(warped)
         filename = "../output_images/lanes_marked_{}.jpg".format(index)
-        img = annotate_road_image(imgs[index])
-        plt.imsave(filename, img)
+        img = fit_poly(warped_binary, visualize=True, filename=filename)
 
 if viz:
     annotated = annotate_road_image(undistorted[7])
@@ -139,8 +140,8 @@ if viz:
 
 
 if not viz:
-    in_vid = '../project_video.mp4'
-    out_vid  = '../processed_' + in_vid.split('/')[-1]
+    in_vid = '../harder_challenge_video.mp4'
+    out_vid = '../processed_' + in_vid.split('/')[-1]
     clip = VideoFileClip(in_vid)
     annotated_clip = clip.fl_image(annotate_road_image)
     annotated_clip.write_videofile(out_vid, audio=False)
