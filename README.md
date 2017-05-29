@@ -1,152 +1,178 @@
 ## Advanced Lane Finding Project
----
+
+[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
+
+Overview - Udacity Self Driving Car Term 1 Project 3
+----------------------------------------------------
+
+![annotated][./ouput_images/annotated0.jpg]
+
 
 The goals / steps of this project are the following:
 
 * Compute the camera calibration matrix and distortion coefficients given a set of chessboard images.
 * Apply a distortion correction to raw images.
+* Apply a perspective transform to rectify image ("birds-eye view").
 * Use color transforms, gradients, etc., to create a thresholded binary image.
-* Apply a perspective transform to rectify binary image ("birds-eye view").
 * Detect lane pixels and fit to find the lane boundary.
 * Determine the curvature of the lane and vehicle position with respect to center.
 * Warp the detected lane boundaries back onto the original image.
 * Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
 
-[//]: # (Image References)
-
-[image1]: ./examples/undistort_output.png "Undistorted"
-[image2]: ./test_images/test1.jpg "Road Transformed"
-[image3]: ./examples/binary_combo_example.jpg "Binary Example"
-[image4]: ./examples/warped_straight_lines.jpg "Warp Example"
-[image5]: ./examples/color_fit_lines.jpg "Fit Visual"
-[image6]: ./examples/example_output.jpg "Output"
-[video1]: ./project_video.mp4 "Video"
-
-## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
-
-### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
-
----
-
-### Writeup / README
-
-#### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  [Here](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) is a template writeup for this project you can use as a guide and a starting point.  
-
-You're reading it!
 
 ### Camera Calibration
 
-#### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
+Lenses create a distortion in the images they capture due to the fact that they are never perfectly curved (in theory the edge of a lens must have 0 width, now that is not really possible). This distortion can be corrected by software. 
+The lens is used to shoot a chess board from multiple angles. Software can identify the vertices of the squares on the chess board and a mathematical model for correcting the specific lens (as a chess board has known properties) for the distortions it causes.
 
-The code for this step is in `code/camera_calibration.py`
+We use the opencv function `cv2.findChessboardCorners()` to find the 2d coordinates of multiple chessboards shot with the same lens. 
+Associated with each picture we also store the coordinates of an ideal chessboard.
+Later we use this data with `cv2.calibrateCamera()` to compute the camera calibration and distortion coefficients. This distortion correction can now be applied to any image with the `cv2.undistort()` function. 
+On running it on an we get: 
 
-I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objpoints` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  
-
-I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result: 
+The code can be found in `code/camera_calibration.py`
 
 ![camera calibration][output_images/calibrated.jpg]
 
-The calibration needs to be done only once. The results are save in `camera_ca/calibration.p` for further use
+The calibration needs to be done only once. The results are save in `camera_ca/calibration.p` for further use.
 
-### Pipeline (single images)
+### Distortion Corrected Image
 
-#### 1. Provide an example of a distortion-corrected image.
-
-To demonstrate this step, an image from the `test_images\` directory is loaded and distortion correction is applied on it in `test_calibration_on_road.py`.
-The calibration details loads the Calibration Matrix and Distortion Coefficient for this camera from  `camera_ca/calibration.p` and undistorts the image by applying the `cv2.undistort()` function
-Here we see that the results are not as clearly appreciated as on a chess board image. Look closely at the white car on the right and the dashboard of the driving car one can see distortion correction.
+To demonstrate this an image from the `test_images\` directory is loaded and distortion correction is applied on it in `test_calibration_on_road.py`.
+The calibration details loads the Calibration Matrix and Distortion Coefficient for this camera from  `camera_ca/calibration.p` and undistorts the image by applying the `cv2.undistort()` function.
+Here we see that the results are not as clearly appreciated as on a chess board image. Look closely at the white car on the right and the dashboard of the driving car, one can see distortion correction.
  
 ![distortion correction on road][output_images/road_undistorted]
 
-#### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
+### Perspective Transform
 
-The goal is to identify lanes on the road. We use a combination of tow approaches. Image color tranforms and Sobel operator transformation to find near vertical edges (lanes are vertical)
-In order to select the most useful transforms I tested various transforms out in `transform_selection_for_lane_detection.py`
- 
- 
-From http://vanseodesign.com/web-design/hue-saturation-and-lightness/ we learn that 
-> Saturation refers to how pure or intense a given hue is. 100% saturation means there’s no addition of gray to the hue. The color is completely pure. At the other extreme a hue with 0% saturation appears as a medium gray. The more saturated (closer to 100%) a color is, the more vivid or brighter it appears. Desaturated colors, on the other hand, appear duller
-
-We can play with saturation, lightness and hue on this link https://www.w3schools.com/colors/colors_hsl.asp
-
-Anything that needs to stand out on a dark surface or needs to be visible in the dark needs to have a high saturation and medium to high lightness. Road lanes clearly fit into that category.
-
-Again for anything to stand out on a dark surface needs to have some amount of brightness. The V channels in HSV colorspace specifies the brightness of the image.
-
-In addition, we use a Sobel operator in the X direction, this isolates edges that are present in the y (vertical) direction in the image. Lanes lines are generally vertical.
-
-We will use a combination of these to find lanes on the road. Let use see a few examples of these transforms on some of the simple and troublesome images 
-
-![color space][output_images/color_transform_test.jpg]
-
-As anticipated the saturation in HLS looks to be the most promising transform to find lanes. 
-
-![soble x][output_images/sobel_transform_test.jpg]
-
-And the Sobel X seems to work well to identify horizontal lines
-
-We now stack these images onto one another to yield a more complete picture 
-
-![stacked][output_images/stacked.jpg]
-
-
-#### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
-
-Now we move to transform the view of the dash cam to a birds eye view. 
+In order to find landes effectively we transform the view from the dash cam to a birds eye view. 
 This allows for better identification and fitting of the lines.
 
 The key to getting a a good transform is the right identification of the vanishing point (where the train tracks would join) in the source image.
-In `test_images\straight_lines1.jpg` we identify that the vanishing point is at 420 px from the top.
+In `test_images\straight_lines1.jpg` we identify that the vanishing point is at 418px from the top.
 
 Based on this we can use any isosceles trapezoid with its base centered at the bottom of the image and its sized converging to the vanishing point.
 
-We use one which covers almsst all of the cameras wide angle view as seen below:
+We use one which covers almost all of the cameras wide angle view as seen below:
 
 ![stacked][output_images/trapezoid.jpg]
 ![bird view with marker][output_images/birds_view_with_trapezoid.jpg]
 
 Taking a wide view has an added advantage we can use this transform to restrict the region of interest in one pass.
-Here we have accepted data from 60 pixels outside the trapezoid on the sides and 20 px from top. nothing from below as the trapezoid is at the bottom of the image. 
-This can be seen in `code/detect.lanes.py` 
+The arithmetic in `code/detect.lanes.py` looks like
+
 ```
-bird_view_size = (600, 600)  # Setup a 600x600 image to look at the birds view
-offsets = [60, 20, -60, 0]
+# arithmetic on the vanishing point to get the trapezoid points
+
+vp_y = 418  # vp from top of image
+indent_x = -30  # trapezoid base indent into image (negative value go outside)
+delta = 40  # distance to trapezoid top from vp
+t = vp_y + delta  # top pf trapezoid from top of image
+s = ((640-indent_x)*delta) / (720-vp_y)  # length of trapezoid top / 2
+src = np.float32([[640-s, t], [640+s, t], [1280-indent_x, 720], [indent_x, 720]])
 ```
 
+We additionally accept information from the image from out side the trapezoid. 
+40px from the left, 0 from top, 40 from the right and 0 from the bottom 
+ 
+```
+bird_view_size = (800, 800)  # Setup a 800x800 image to look at the birds view
+offsets = [40, 0, 40, 0]  # offset to where the trapezoid vertices should be transformed to. positive values go into the image
+```
+
+![bird view][output_images/birds_view_with_trapezoid.jpg]
+
+We see that the transformation into birds views results in parallel road lines.
 Transforming our set of trouble images into birds eye view would result in
  
 ![bird view][output_images/birds_view.jpg]
 
 We can see that the lanes are parallel and pretty clear at the bottom of the views (near the camera of car), looks good so far.
 
-#### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
-Now we can fit a second degree polynomial 
+### Color Transforms and Thresholds
 
-![alt text][image5]
+The goal is to identify lanes on the road. We use a combination of tow approaches. Image color tranforms and Sobel operator transformation to find near vertical edges (lanes are vertical)
+In order to select the most useful transforms I tested various transforms out in `transform_selection_for_lane_detection.py`
 
-#### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
+Getting this step is key successfully identifying lines. After some tedious experimentation we used a yellow color mask a LAB B channel mask and a Sobel X Operation Mask (isolates verticle lines)
+These are stacked on each other so that we get a combined signal from each source.
 
-I did this in lines # through # in my code in `my_other_file.py`
+Images from each source are thresholded by values determined emperically thus the final signal from every pixel is wither a 0 or a 1 (in our case 255) 
 
-#### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
+![stacked][./output_images/birds_view_masked.jpg]
 
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
 
-![alt text][image6]
+### Polynomial Fit
 
----
+The lane curves from the birds eye view are moderate, a 2nd degree polynomial is used to fit the signals into separate 2 lines.
 
-### Pipeline (video)
+First a point identifying the start of the lane line (one each for left and right) is chosen. This is done by taking at the sum of points in the y direction upto half the image and selecting the one with the highest magnitude.
 
-#### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
+```
+histogram = np.sum(binary_warped[binary_warped.shape[0]//2:,:], axis=0)
+...    
+midpoint = np.int(histogram.shape[0]/2)
+leftx_base = np.argmax(histogram[:midpoint])
+rightx_base = np.argmax(histogram[midpoint:]) + midpoint
+```
+ 
+![histogram][./output_images/histogram.jpg]
 
-Here's a [link to my video result](./project_video.mp4)
+We use a sliding window approach where the image is split in to half vertically then a small window slide across each half looking for strong input singals
 
----
+Each window starts above the lower one and then searches for the area where the signal is strongest (centroid)
+
+These centroids are then fitted by a second degree curve.
+
+![sliding window1][./output_imageslanes_marked_3.jpg]
+![sliding window2][./output_imageslanes_marked_6.jpg]
+
+### Vehicle Position in Lane
+
+We know that road lane are 3.7 m apart, we also know the distance in px between between lanes in the warped image.
+So every pixel's value can be computed in m.
+If the camera_center > lane_center  then the vehicle and veered to the right. This is computed as function 
+```
+def distance_from_center(warped_width, warped_height, left_fit, right_fit):
+    lc = lane_poly(warped_height, left_fit)
+    rc = lane_poly(warped_height, right_fit)
+    lane_center = (lc + rc) / 2
+    camera_center = warped_width / 2
+    lane_width = rc - lc
+    # lane width = 3.7m
+    return ((lane_center-camera_center)/lane_width) * 3.7, 'left' if lane_center > camera_center else 'right'
+```
+
+### Curvature of Lane at the Vehicle
+
+A guide on radius of curvature http://www.intmath.com/applications-differentiation/8-radius-curvature.php
+
+Fist we convert the left_fit and right_fit from warped space to undistorted space. 
+The radius of curvature for a quadratic function is computed with the formula
+( (1 + f'(y)^2)^3/2 ) / abs(2f''(y)
+
+See the function `curvature_lr()` in `lane_marking_utils.py`   
+
+
+![annotated][./ouput_images/annotated7.jpg]
+
+### Result (video)
+
+Here's a [link to the video result](./processed_project_video.mp4)
 
 ### Discussion
 
-#### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
-
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+- The course and guide suggest that after distortion correction first the color and gradient transforms with thresholds should be applied to the images.
+The goal is to find the lane lines so it is probably better to apply the perspective transform followed by the colorspace work.
+This helps greatly in selecting weights, thresholds, kernels, hue numbers etc. As the result directly appears as a line / curve
+- The key to solving this is finding the right image transforms. 
+- We could use a smaller warped images and fewer sliding windows. The goal is to fit a 2nd degree curve. this would make the pipeline faster.      
+- Smoothing can be applied between frames so that there is no abrupt change in lane values and mitigating lane detection drops.
+- The lanes are parallel and 3.7m apart so that information can be used for correction
+- Slopes can be handled if we can use an algorithm to find the horizon and use a dynamic perspective transform matrix. 
+The code already allows us to change the location of the vanishing point
+- GPS location with aerial photography could help with tricky areas of the road (massive slopes, bridges, sharp shadows etc)
+- It would be interesting to see if this technique would would well at night. My guess is that it would do better
+- It would also be very interesting to see how this plays out in the infra red spectrum. We know the lines are perceptibly cooler than tarmac

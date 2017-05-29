@@ -2,7 +2,7 @@ import glob
 import cv2
 import matplotlib.pyplot as plt
 from calibration_utils import camera_calibration_load, load_and_undistort_img
-from image_color_transforms import abs_sobel_threshold, magnitude_threshold, direction_threshold, pipeline
+from image_color_transforms import abs_sobel_threshold, magnitude_threshold, direction_threshold, color_pipeline, color_pipeline1
 
 input_files = glob.glob('../test_images/*.jpg')
 output_dir = '../output_images/'
@@ -35,6 +35,22 @@ plt.subplots_adjust(left=0.03, right=0.97, top=0.97, bottom=0.03)
 plt.subplots_adjust(hspace=.1, wspace=.05)
 f.savefig('../output_images/color_transform_test.jpg')
 
+# Look at yellow mask
+f, axes = plt.subplots(len(imgs_to_examine), 2, figsize=(15, 20))
+f.tight_layout()
+for i, index in enumerate(imgs_to_examine):
+    img = undistorted[index]
+    axes[i][0].set_title('Original Image', fontsize=19)
+    axes[i][0].imshow(img)
+    axes[i][0].axis('off')
+    axes[i][1].set_title('HLS - Saturation Channel', fontsize=19)
+    axes[i][1].imshow(color_pipeline1(img))
+    axes[i][1].axis('off')
+plt.subplots_adjust(left=0.03, right=0.97, top=0.97, bottom=0.03)
+plt.subplots_adjust(hspace=.1, wspace=.05)
+f.savefig('../output_images/color_transform_yellow.jpg')
+
+
 
 # Look at Sobel transfroms
 f, axes = plt.subplots(len(imgs_to_examine), 4, figsize=(30, 20))
@@ -61,7 +77,7 @@ f.savefig('../output_images/sobel_transform_test.jpg')
 f, axes = plt.subplots(len(imgs_to_examine), 4, figsize=(30, 20))
 f.tight_layout()
 for i, index in enumerate(imgs_to_examine):
-    s_binary, sx_binary, binary = pipeline(cv2.cvtColor(undistorted[index], cv2.COLOR_BGR2RGB), s_threshold=(170, 255),
+    s_binary, sx_binary, binary = color_pipeline(cv2.cvtColor(undistorted[index], cv2.COLOR_BGR2RGB), s_threshold=(170, 255),
                                            sx_threshold=(20, 255))
     axes[i][0].set_title('Original Image', fontsize=19)
     axes[i][0].imshow(undistorted[index])
