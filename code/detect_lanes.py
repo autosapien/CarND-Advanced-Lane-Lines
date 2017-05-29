@@ -1,9 +1,7 @@
 import glob
 import cv2
 import numpy as np
-from collections import deque
 from moviepy.editor import VideoFileClip
-from IPython.display import HTML
 from calibration_utils import camera_calibration_load, load_and_undistort_img, undistort_img
 from image_color_transforms import color_pipeline, color_pipeline_ng, yellow_mask, lab_b_mask
 from perspective_utils import image_add_offset, bird_view
@@ -12,7 +10,7 @@ import matplotlib.pyplot as plt
 
 input_files = glob.glob('../test_images/*.jpg')
 output_dir = '../output_images/'
-viz = False
+viz = True
 
 
 def annotate_road_image(image):
