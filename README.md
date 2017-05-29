@@ -36,7 +36,7 @@ The code can be found in `code/camera_calibration.py`
 
 The calibration needs to be done only once. The results are save in `camera_ca/calibration.p` for further use.
 
-### Distortion Corrected Image
+### Distortion Correction
 
 To demonstrate this an image from the `test_images/` directory is loaded and distortion correction is applied on it in `test_calibration_on_road.py`.
 The calibration details loads the Calibration Matrix and Distortion Coefficient for this camera from  `camera_ca/calibration.p` and undistorts the image by applying the `cv2.undistort()` function.
