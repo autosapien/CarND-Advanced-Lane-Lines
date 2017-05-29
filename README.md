@@ -155,7 +155,7 @@ The radius of curvature for a quadratic function is computed with the formula
 See the function `curvature_lr()` in `lane_marking_utils.py`   
 
 
-![annotated](./ouput_images/annotated7.jpg)
+![annotated](./output_images/annotated7.jpg)
 
 ### Result (video)
 
