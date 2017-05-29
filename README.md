@@ -38,7 +38,7 @@ The calibration needs to be done only once. The results are save in `camera_ca/c
 
 ### Distortion Corrected Image
 
-To demonstrate this an image from the `test_images\` directory is loaded and distortion correction is applied on it in `test_calibration_on_road.py`.
+To demonstrate this an image from the `test_images/` directory is loaded and distortion correction is applied on it in `test_calibration_on_road.py`.
 The calibration details loads the Calibration Matrix and Distortion Coefficient for this camera from  `camera_ca/calibration.p` and undistorts the image by applying the `cv2.undistort()` function.
 Here we see that the results are not as clearly appreciated as on a chess board image. Look closely at the white car on the right and the dashboard of the driving car, one can see distortion correction.
  
@@ -50,14 +50,13 @@ In order to find landes effectively we transform the view from the dash cam to a
 This allows for better identification and fitting of the lines.
 
 The key to getting a a good transform is the right identification of the vanishing point (where the train tracks would join) in the source image.
-In `test_images\straight_lines1.jpg` we identify that the vanishing point is at 418px from the top.
+In `test_images/straight_lines1.jpg` we identify that the vanishing point is at 418px from the top.
 
 Based on this we can use any isosceles trapezoid with its base centered at the bottom of the image and its sized converging to the vanishing point.
 
 We use one which covers almost all of the cameras wide angle view as seen below:
 
 ![stacked](output_images/trapezoid.jpg)
-![bird view with marker](output_images/birds_view_with_trapezoid.jpg)
 
 Taking a wide view has an added advantage we can use this transform to restrict the region of interest in one pass.
 The arithmetic in `code/detect.lanes.py` looks like
@@ -126,8 +125,8 @@ Each window starts above the lower one and then searches for the area where the 
 
 These centroids are then fitted by a second degree curve.
 
-![sliding window1](./output_imageslanes_marked_3.jpg)
-![sliding window2](./output_imageslanes_marked_6.jpg)
+![sliding window1](./output_images/lanes_marked_3.jpg)
+![sliding window2](./output_images/lanes_marked_6.jpg)
 
 ### Vehicle Position in Lane
 

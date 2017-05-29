@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 input_files = glob.glob('../test_images/*.jpg')
 output_dir = '../output_images/'
-viz = False
+viz = True
 
 
 def annotate_road_image(image):
@@ -128,15 +128,16 @@ if viz:
         img = annotate_road_image(imgs[index])
         plt.imsave(filename, img)
 
-if True:
+if viz:
     annotated = annotate_road_image(undistorted[7])
     plt.imsave('../output_images/annotated7.jpg', annotated)
     annotated = annotate_road_image(undistorted[0])
     plt.imsave('../output_images/annotated0.jpg', annotated)
 
-in_vid = '../project_video.mp4'
-out_vid  = '../processed_' + in_vid.split('/')[-1]
-#clip = VideoFileClip(in_vid)
-clip = VideoFileClip(in_vid)
-annotated_clip = clip.fl_image(annotate_road_image)
-annotated_clip.write_videofile(out_vid, audio=False)
+
+if not viz:
+    in_vid = '../project_video.mp4'
+    out_vid  = '../processed_' + in_vid.split('/')[-1]
+    clip = VideoFileClip(in_vid)
+    annotated_clip = clip.fl_image(annotate_road_image)
+    annotated_clip.write_videofile(out_vid, audio=False)
