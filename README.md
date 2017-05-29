@@ -5,7 +5,7 @@
 Overview - Udacity Self Driving Car Term 1 Project 3
 ----------------------------------------------------
 
-![annotated](./ouput_images/annotated0.jpg)
+![annotated](./output_images/annotated7.jpg)
 
 
 The goals / steps of this project are the following:
